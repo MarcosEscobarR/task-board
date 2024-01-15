@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Board     Board[]
+}
+
+model Board {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  isActive  Boolean  @default(false)
+  columns   Column[]
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+}
+
+model Column {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  tasks     Task[]
+  board     Board?   @relation(fields: [boardId], references: [id])
+  boardId   Int?
+}
+
+model Task {
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  title       String
+  description String
+  status      TaskStatus @default(TODO)
+  subtasks    Subtask[]
+  column      Column?    @relation(fields: [columnId], references: [id])
+  columnId    Int?
+}
+
+model Subtask {
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  title       String
+  isCompleted Boolean  @default(false)
+  task        Task?    @relation(fields: [taskId], references: [id])
+  taskId      Int?
+}
+
+enum TaskStatus {
+  TODO
+  DOING
+  DONE
+}
